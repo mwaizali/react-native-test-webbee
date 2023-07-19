@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useRef, useState} from 'react';
 import {
   View,
   TextInput,
@@ -14,11 +14,14 @@ import {
   getMachinesData,
   updateForm,
 } from '../../ducks/machineCategories';
+import { DatePickerModal } from '../../modal';
+import { Util } from '../../utils';
 import styles from './styles';
 
 const MachineForm = ({route}) => {
   const id = route.params?.id ?? '';
   const machineFormData = useSelector(getMachinesData(id));
+  const datePickerModalRef = useRef()
   const dispatch = useDispatch();
   console.log(machineFormData);
 
@@ -43,7 +46,6 @@ const MachineForm = ({route}) => {
   };
 
   const renderItem = ({item, index}) => {
-    console.log('item', item);
 
     return (
       <>
@@ -55,6 +57,7 @@ const MachineForm = ({route}) => {
               <TextInput
                 style={styles.input}
                 value={attribute.value}
+                keyboardType={attribute.type === 'NUMBER' ?'number-pad':'default'}
                 onChangeText={value =>
                   handleAttributeChange(index, attribute.id, value)
                 }
@@ -67,11 +70,18 @@ const MachineForm = ({route}) => {
                 }
               />
             ) : (
-              // For date type, you can use a DatePicker component
               <TouchableOpacity
-                onPress={() => console.log('Implement DatePicker here')}>
+              style={styles.datePickerView}
+                onPress={() => 
+                  datePickerModalRef.current.show({
+                    onSelected:(date)=>{
+                      console.log(date)
+                      handleAttributeChange(index, attribute.id, date)
+                    }
+                  })
+                }>
                 <Text style={styles.datePickerText}>
-                  {attribute.value ? attribute.value.toString() : 'Select Date'}
+                  {attribute.value ? Util.formatDate(attribute.value,'MM/DD/YYYY')  : 'Select Date'}
                 </Text>
               </TouchableOpacity>
             )}
@@ -92,8 +102,9 @@ const MachineForm = ({route}) => {
         </TouchableOpacity>
       </View>
       <View style={{flex: 1}}>
-        <FlatList data={machineFormData?.forms ?? []} renderItem={renderItem} />
+        <FlatList data={machineFormData?.forms ?? []} renderItem={renderItem} contentContainerStyle={{marginTop:10}}/>
       </View>
+      <DatePickerModal ref={datePickerModalRef} />
     </View>
   );
 };

@@ -1,4 +1,4 @@
 /** @format */
 import DropDown from './DropDown';
-
-export {DropDown};
+import DatePickerModal from './DatePickerModal';
+export {DropDown, DatePickerModal};

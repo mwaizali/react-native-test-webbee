@@ -1,4 +1,3 @@
-import { Picker } from '@react-native-picker/picker';
 import React, { useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, StyleSheet, ScrollView } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
@@ -106,7 +105,6 @@ const AddCategories: React.FC = () => {
   };
 
   return (
-    <ScrollView>
       <View style={styles.container}>
         <FlatList
           data={machinesData}
@@ -189,9 +187,7 @@ const AddCategories: React.FC = () => {
           </TouchableOpacity>
         </View>
         <DropDown ref={dropDownModal} />
-        <AppDrawer />
       </View>
-    </ScrollView>
   );
 };
 

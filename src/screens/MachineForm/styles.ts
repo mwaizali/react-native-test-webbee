@@ -25,8 +25,7 @@ export default StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 10,
   },
-  datePickerText: {
-    flex: 1,
+  datePickerView: {
     height: 40,
     borderWidth: 1,
     borderColor: '#ccc',
@@ -34,6 +33,8 @@ export default StyleSheet.create({
     paddingHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  datePickerText: {
   },
   addFormButtonView: {
     // flex: 1,
