@@ -5,12 +5,8 @@ import {StyleSheet} from 'react-native';
 export default StyleSheet.create({
   container: {
     flex: 1,
-    marginHorizontal: 20,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   attributeContainer: {
     flexDirection: 'row',
@@ -29,6 +25,17 @@ export default StyleSheet.create({
     borderRadius: 4,
     paddingHorizontal: 10,
   },
+  datePickerView: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
+    paddingHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  datePickerText: {
+  },
   addFormButtonView: {
     // flex: 1,
     flexDirection: 'row',
@@ -39,14 +46,6 @@ export default StyleSheet.create({
     fontSize: 16,
     color: 'black',
     fontWeight: 'bold',
-  },
-  machineTypeTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  addMachineTypeButtonContainer: {
-    marginTop: 10,
   },
   addMachineTypeButton: {
     paddingVertical: 8,

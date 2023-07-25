@@ -12,7 +12,7 @@ export const addNewForm = makeAction('ADD_NEW_FORM');
 export const updateForm = makeAction('UPDATE_FORM');
 export const removeForm = makeAction('REMOVE_FORM');
 // init state
-const initalState = {data: []};
+const initalState = {data: [], attributesData: {}};
 
 // init reducer
 export default createReducer(initalState, builder => {
@@ -43,32 +43,31 @@ export default createReducer(initalState, builder => {
   builder.addCase(addMachineAttribute, (state, action) => {
     const {id, attribute} = action.payload;
     const index = state.data.findIndex(machineType => machineType.id === id);
+    state.attributesData[attribute.id] = attribute;
     if (index >= 0) {
       state.data[index] = {
         ...state.data[index],
-        attributes: [...state.data[index].attributes, ...attribute],
+        attributes: [...state.data[index].attributes, ...[attribute.id]],
       };
+    }
+    if (index >= 0 && state.data[index]?.forms.length > 0) {
+      state.data[index].forms?.map((item, mapIndex) => {
+        item.push({
+          id: attribute.id,
+          value: '',
+        });
+      });
     }
   });
   builder.addCase(updateMachineAttribute, (state, action) => {
     const {id, attribute} = action.payload;
-    const index = state.data.findIndex(machineType => machineType.id === id);
+    // const index = state.data.findIndex(machineType => machineType.id === id);
 
-    if (index >= 0 && state.data[index].attributes.length > 0) {
-      const attributeIndex = state.data[index].attributes.findIndex(
-        val => val.id === attribute.id,
-      );
-      if (attributeIndex >= 0) {
-        state.data[index].attributes[attributeIndex] = {
-          ...state.data[index].attributes[attributeIndex],
-          ...attribute,
-        };
-      } else {
-        state.data[index] = {
-          ...state.data[index],
-          attributes: [...state.data[index].attributes, ...[attribute]],
-        };
-      }
+    if (state.attributesData[attribute.id]) {
+      state.attributesData[attribute.id] = {
+        ...state.attributesData[attribute.id],
+        ...attribute,
+      };
     }
   });
   builder.addCase(removeMachineAttribute, (state, action) => {
@@ -77,8 +76,22 @@ export default createReducer(initalState, builder => {
 
     if (index >= 0 && state.data[index].attributes.length > 0) {
       state.data[index].attributes = state.data[index].attributes.filter(
-        val => val.id !== attribute.id,
+        val => val !== attribute.id,
       );
+    }
+    if (index >= 0 && state.data[index]?.forms.length > 0) {
+      state.data[index].forms?.map((item, mapIndex) => {
+        console.log(mapIndex, item);
+        state.data[index].forms[mapIndex] = item.filter(
+          val => val.id !== attribute.id,
+        );
+      });
+      // state.data[index].forms = state.data[index].forms.filter(
+      //   val => val !== attribute.id,
+      // );
+    }
+    if (state.attributesData[attribute.id]) {
+      delete state.attributesData[attribute.id];
     }
   });
 
@@ -115,10 +128,12 @@ export default createReducer(initalState, builder => {
 });
 
 const defaultArray = [];
-
+const defaultObject = {};
 // selectors
 
 export const getMachines = state =>
   state.machineCategories.data ?? defaultArray;
 export const getMachinesData = id => state =>
   state.machineCategories.data.filter(val => val.id === id)[0];
+export const getMachinesAttributeData = id => state =>
+  state.machineCategories.attributesData?.[id] ?? defaultObject;

@@ -7,12 +7,13 @@ import {
   addMachineAttribute,
   addMachineCategory,
   getMachines,
+  getMachinesAttributeData,
   removeMachineAttribute,
   removeMachineCategory,
   updateMachineAttribute,
   updateMachineCategory,
 } from '../../ducks/machineCategories';
-import { DropDown, DropDownRefProps } from '../../modal';
+import { DropDown } from '../../modal';
 import { Util } from '../../utils';
 import styles from './styles';
 
@@ -32,7 +33,7 @@ interface MachineType {
 }
 
 const AddCategories: React.FC = () => {
-  const dropDownModal = useRef<DropDownRefProps>(null);
+  const dropDownModal = useRef<any>(null);
   const dispatch = useDispatch();
 
   const machinesData = useSelector(getMachines);
@@ -66,7 +67,7 @@ const AddCategories: React.FC = () => {
     dispatch(
       addMachineAttribute({
         id: machineTypeId,
-        attribute: [attribute],
+        attribute: attribute,
       }),
     );
   };
@@ -104,14 +105,47 @@ const AddCategories: React.FC = () => {
     );
   };
 
+  const AttributeItem = ({ attributeId, index, machine }: { attributeId: string, index: Number, machine: any }) => {
+    const attribute: Attribute = useSelector(getMachinesAttributeData(attributeId))
+    console.log('attribute', attribute)
+    return (
+      <View key={index} style={styles.formField}>
+        <TextInput
+          placeholder="Attribute Name"
+          value={attribute.name}
+          onChangeText={(text) => updateAttributeName(machine.id, attribute, text)}
+          style={styles.attributeNameInput}
+        />
+        <TouchableOpacity
+          style={styles.attributeTypePicker}
+          onPress={() => {
+            dropDownModal.current?.show({
+              data: options.attributeOptions,
+              onPress: (type: any) => {
+                updateAttributeType(machine.id, attribute, type.identifier);
+              },
+            });
+          }}>
+          <Text>{attribute.type}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => removeFieldFromMachineType(machine.id, attribute)}
+          style={styles.removeButton}>
+          <Text style={styles.removeButtonText}>Remove</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
   return (
-      <View style={styles.container}>
-        <FlatList
-          data={machinesData}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+    <View style={styles.container}>
+      <FlatList
+        data={machinesData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+          return (
             <View style={styles.machineTypeContainer}>
-              <Text style={styles.machineTypeTitle}>{item.name}</Text>
+              <Text style={styles.machineTypeTitle}>{item?.name ?? ''}</Text>
               <View style={styles.formCreator}>
                 <View style={styles.formInput}>
                   <TextInput
@@ -123,39 +157,18 @@ const AddCategories: React.FC = () => {
                 </View>
                 <View>
                   <Text style={styles.label}>Attributes:</Text>
-                  {item.attributes.map((attribute, index) => (
-                    <View key={index} style={styles.formField}>
-                      <TextInput
-                        placeholder="Attribute Name"
-                        value={attribute.name}
-                        onChangeText={(text) => updateAttributeName(item.id, attribute, text)}
-                        style={styles.attributeNameInput}
-                      />
-                      <TouchableOpacity
-                        style={styles.attributeTypePicker}
-                        onPress={() => {
-                          dropDownModal.current?.show({
-                            data: options.attributeOptions,
-                            onPress: (type) => {
-                              updateAttributeType(item.id, attribute, type.identifier);
-                            },
-                          });
-                        }}>
-                        <Text>{attribute.type}</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => removeFieldFromMachineType(item.id, attribute)}
-                        style={styles.removeButton}>
-                        <Text style={styles.removeButtonText}>Remove</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                  {item.attributes.map((attributeId: Attribute, index: number) => {
+
+                    return (
+                      <AttributeItem attributeId={attributeId} index={index} machine={item} />
+                    )
+                  })}
                   <View style={styles.addFieldButtonContainer}>
                     <TouchableOpacity
                       onPress={() => {
                         dropDownModal.current?.show({
                           data: options.attributeOptions,
-                          onPress: (type) => {
+                          onPress: (type: any) => {
                             addFieldToMachineType(item.id, {
                               id: Util.makeRandomString(10),
                               name: '',
@@ -177,17 +190,19 @@ const AddCategories: React.FC = () => {
                 <Text style={styles.removeMachineTypeButtonText}>Remove Machine Type</Text>
               </TouchableOpacity>
             </View>
-          )}
-        />
-        <View style={styles.addMachineTypeButtonContainer}>
-          <TouchableOpacity
-            onPress={() => addMachineType('New Machine Type')}
-            style={styles.addMachineTypeButton}>
-            <Text style={styles.addMachineTypeButtonText}>Add Machine Type</Text>
-          </TouchableOpacity>
-        </View>
-        <DropDown ref={dropDownModal} />
+          )
+        }
+        }
+      />
+      <View style={styles.addMachineTypeButtonContainer}>
+        <TouchableOpacity
+          onPress={() => addMachineType('New Machine Type')}
+          style={styles.addMachineTypeButton}>
+          <Text style={styles.addMachineTypeButtonText}>Add Machine Type</Text>
+        </TouchableOpacity>
       </View>
+      <DropDown ref={dropDownModal} />
+    </View>
   );
 };
 

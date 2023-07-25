@@ -10,26 +10,25 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {
   addNewForm,
-  getMachines,
+  getMachinesAttributeData,
   getMachinesData,
   updateForm,
 } from '../../ducks/machineCategories';
-import { DatePickerModal } from '../../modal';
-import { Util } from '../../utils';
+import {DatePickerModal} from '../../modal';
+import {Util} from '../../utils';
 import styles from './styles';
 
 const MachineForm = ({route}) => {
   const id = route.params?.id ?? '';
   const machineFormData = useSelector(getMachinesData(id));
-  const datePickerModalRef = useRef()
+  const datePickerModalRef = useRef();
   const dispatch = useDispatch();
-  console.log(machineFormData);
 
   const addNewFormPress = () => {
     dispatch(
       addNewForm({
         id: id,
-        data: [...machineFormData.attributes],
+        data: Util.convertToIdValueArray([...machineFormData.attributes], ''),
       }),
     );
   };
@@ -45,47 +44,60 @@ const MachineForm = ({route}) => {
     );
   };
 
-  const renderItem = ({item, index}) => {
+  const FormItem = ({formData, machineIndex, itemIndex}) => {
+    const attribute = useSelector(getMachinesAttributeData(formData.id));
+    return (
+      <View key={itemIndex} style={styles.attributeContainer}>
+        <Text style={styles.attributeLabel}>{attribute?.name ?? ''}</Text>
+        {attribute?.type === 'TEXT' || attribute?.type === 'NUMBER' ? (
+          <TextInput
+            style={styles.input}
+            value={formData.value}
+            keyboardType={
+              attribute?.type === 'NUMBER' ? 'number-pad' : 'default'
+            }
+            onChangeText={value =>
+              handleAttributeChange(machineIndex, attribute?.id, value)
+            }
+          />
+        ) : attribute?.type === 'CHECKBOX' ? (
+          <Switch
+            value={formData.value}
+            onValueChange={value =>
+              handleAttributeChange(machineIndex, attribute?.id, value)
+            }
+          />
+        ) : (
+          <TouchableOpacity
+            style={styles.datePickerView}
+            onPress={() =>
+              datePickerModalRef.current.show({
+                onSelected: date => {
+                  console.log(date);
+                  handleAttributeChange(machineIndex, attribute?.id, date);
+                },
+              })
+            }>
+            <Text style={styles.datePickerText}>
+              {formData.value
+                ? Util.formatDate(formData.value, 'MM/DD/YYYY')
+                : 'Select Date'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
 
+  const renderItem = ({item, index}) => {
     return (
       <>
-        {item.map((attribute, itemIndex) => (
-          <View key={itemIndex} style={styles.attributeContainer}>
-            {console.log('attribute:', attribute.name)}
-            <Text style={styles.attributeLabel}>{attribute.name}</Text>
-            {attribute.type === 'TEXT' || attribute.type === 'NUMBER' ? (
-              <TextInput
-                style={styles.input}
-                value={attribute.value}
-                keyboardType={attribute.type === 'NUMBER' ?'number-pad':'default'}
-                onChangeText={value =>
-                  handleAttributeChange(index, attribute.id, value)
-                }
-              />
-            ) : attribute.type === 'CHECKBOX' ? (
-              <Switch
-                value={attribute.value}
-                onValueChange={value =>
-                  handleAttributeChange(index, attribute.id, value)
-                }
-              />
-            ) : (
-              <TouchableOpacity
-              style={styles.datePickerView}
-                onPress={() => 
-                  datePickerModalRef.current.show({
-                    onSelected:(date)=>{
-                      console.log(date)
-                      handleAttributeChange(index, attribute.id, date)
-                    }
-                  })
-                }>
-                <Text style={styles.datePickerText}>
-                  {attribute.value ? Util.formatDate(attribute.value,'MM/DD/YYYY')  : 'Select Date'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
+        {item.map((formData, itemIndex) => (
+          <FormItem
+            formData={formData}
+            machineIndex={index}
+            itemIndex={itemIndex}
+          />
         ))}
       </>
     );
@@ -94,7 +106,7 @@ const MachineForm = ({route}) => {
   return (
     <View style={styles.container}>
       <View style={styles.addFormButtonView}>
-        <Text style={styles.titletext}>{machineFormData.name}</Text>
+        <Text style={styles.titletext}>{machineFormData?.name}</Text>
         <TouchableOpacity
           onPress={addNewFormPress}
           style={styles.addMachineTypeButton}>
@@ -102,7 +114,11 @@ const MachineForm = ({route}) => {
         </TouchableOpacity>
       </View>
       <View style={{flex: 1}}>
-        <FlatList data={machineFormData?.forms ?? []} renderItem={renderItem} contentContainerStyle={{marginTop:10}}/>
+        <FlatList
+          data={machineFormData?.forms ?? []}
+          renderItem={renderItem}
+          contentContainerStyle={{marginTop: 10}}
+        />
       </View>
       <DatePickerModal ref={datePickerModalRef} />
     </View>

@@ -1,16 +1,15 @@
-import {FlatList, SafeAreaView, Text, TouchableOpacity} from 'react-native';
+import { FlatList, SafeAreaView, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import styles from './styles';
-import {ButtonView} from '../../components';
-import {useSelector} from 'react-redux';
-import {getMachines} from '../../ducks/machineCategories';
-import {NavigationService} from '../../utils';
+import { useSelector } from 'react-redux';
+import { getMachines } from '../../ducks/machineCategories';
+import { NavigationService } from '../../utils';
 
 const AppDrawer: React.FC = () => {
   const machinesData = useSelector(getMachines);
 
   const onPressItem = (item: any) => {
-    NavigationService.navigate('MachineForm', {id: item.id});
+    NavigationService.navigate('MachineForm', { id: item.id });
   };
 
   const headerView = () => (
@@ -32,16 +31,16 @@ const AppDrawer: React.FC = () => {
     </>
   );
 
-  const renderItem = ({item}: {item: any}) => {
+  const renderItem = ({ item }: { item: any }) => {
     return (
       <TouchableOpacity style={styles.buttonStyle} onPress={() => onPressItem(item)}>
-        <Text style={[styles.buttonTextStyle]}>{item.titleAttribute}</Text>
+        <Text style={[styles.buttonTextStyle]}>{item?.titleAttribute ?? ''}</Text>
       </TouchableOpacity>
     );
   };
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <FlatList
         ListHeaderComponent={headerView}
         data={machinesData}

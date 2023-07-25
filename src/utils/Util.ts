@@ -1,4 +1,8 @@
 import moment from 'moment';
+interface IdValuePair {
+  id: string;
+  value: any;
+}
 
 function formatDate(
   dateString: string | null | undefined,
@@ -28,8 +32,13 @@ function makeRandomString(length: number = 20): string {
   return result;
 }
 
+function convertToIdValueArray(ids: string[], defaultValue: any = null): IdValuePair[] {
+  return ids.map((id) => ({ id, value: defaultValue }));
+}
+
 export default {
   formatDate,
   makeRandomString,
   formatDate2,
+  convertToIdValueArray
 };
